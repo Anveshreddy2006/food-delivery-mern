@@ -1,15 +1,25 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+
 dotenv.config();
-// Create a transporter using Ethereal test credentials.
-// For production, replace with your actual SMTP server details.
+
+console.log("ENV CHECK EMAIL:", process.env.EMAIL);
+console.log(
+  "ENV CHECK EMAIL_PASSWORD:",
+  process.env.EMAIL_PASSWORD,
+  typeof process.env.EMAIL_PASSWORD,
+);
+
 const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  port: 465,
-  secure: true, // Use true for port 465, false for other ports
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL,
-    pass: process.env.PASS,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 
@@ -18,6 +28,6 @@ export const sendOtpMail = async (to, otp) => {
     from: process.env.EMAIL,
     to,
     subject: "Reset Your Password",
-    html: `<p>Your OTP for password reset is <b>${otp}</b>. It expires in 5 minutes.</p>`,
+    text: `Your OTP is ${otp}. It expires in 5 minutes.`,
   });
 };

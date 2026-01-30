@@ -5,7 +5,7 @@ import { FaRegEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { serverURL } from "../App";
+import { serverUrl } from "../config";
 function SignIn() {
   const primaryColor = "#ff4d2d";
   const hoverColor = "#e64323";
@@ -19,7 +19,7 @@ function SignIn() {
   const handleSignIn = async () => {
     try {
       const result = await axios.post(
-        `${serverURL}/api/auth/signin`,
+        `${serverUrl}/api/auth/signin`,
         {
           email,
           password,

@@ -6,6 +6,12 @@ import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { serverUrl } from "../config";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from "../../firebase";
+import { ClipLoader } from "react-spinners";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/userSlice";
+
 function SignIn() {
   const primaryColor = "#ff4d2d";
   const hoverColor = "#e64323";
@@ -15,8 +21,12 @@ function SignIn() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const handleSignIn = async () => {
+    setLoading(true);
     try {
       const result = await axios.post(
         `${serverUrl}/api/auth/signin`,
@@ -27,7 +37,28 @@ function SignIn() {
         { withCredentials: true },
       );
 
-      console.log(result);
+      dispatch(setUserData(result.data));
+      setErr("");
+      setLoading(false);
+    } catch (error) {
+      setErr(error?.response?.data?.message);
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    try {
+      const { data } = await axios.post(
+        `${serverUrl}/api/auth/google-auth`,
+        {
+          email: result.user.email,
+        },
+        { withCredentials: true },
+      );
+
+      dispatch(setUserData(data));
     } catch (error) {
       console.log(error);
     }
@@ -67,6 +98,7 @@ function SignIn() {
             style={{ border: `1px solid ${borderColor}` }}
             onChange={(e) => setEmail(e.target.value)}
             value={email}
+            required
           />
         </div>
 
@@ -86,6 +118,7 @@ function SignIn() {
               style={{ border: `1px solid ${borderColor}` }}
               onChange={(e) => setPassword(e.target.value)}
               value={password}
+              required
             />
 
             <button
@@ -108,14 +141,18 @@ function SignIn() {
           className="w-full font-semibold py-2 rounded-lg transition duration-200
              bg-[#ff4d2d] text-white hover:bg-[#e64323] cursor-pointer"
           onClick={handleSignIn}
+          disabled={loading}
         >
-          Sign In
+          {loading ? <ClipLoader size={20} color="white" /> : " Sign In"}
         </button>
+
+        {err && <p className="text-red-500 text-center mt-2">*{err}</p>}
 
         <button
           className="w-full mt-4 flex items-center justify-center gap-2 border
              rounded-lg px-4 py-2 transition cursor-pointer duration-200
              border-gray-400 hover:bg-gray-100"
+          onClick={handleGoogleAuth}
         >
           <FcGoogle size={20} />
           <span>Sign In with Google</span>

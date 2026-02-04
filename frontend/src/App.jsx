@@ -4,6 +4,7 @@ import SignUp from "./pages/SignUp";
 import SignIn from "./pages/signIn";
 import ForgotPassword from "./pages/ForgotPassword";
 import useGetCurrentUser from "./hooks/useGetCurrentUser";
+import useGetMyshop from "./hooks/useGetMyShop.jsx";
 import { useSelector } from "react-redux";
 import Home from "./pages/Home";
 import useGetCity from "./hooks/useGetCity";
@@ -11,6 +12,7 @@ import useGetCity from "./hooks/useGetCity";
 function App() {
   useGetCurrentUser();
   useGetCity();
+  useGetMyshop();
   const { userData } = useSelector((state) => state.user);
   return (
     <Routes>

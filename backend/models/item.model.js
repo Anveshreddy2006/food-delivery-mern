@@ -28,6 +28,7 @@ const itemSchema = new mongoose.Schema(
         "Fast Food",
         "Others",
       ],
+
       required: true,
     },
     pric: {

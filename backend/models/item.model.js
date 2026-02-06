@@ -31,7 +31,7 @@ const itemSchema = new mongoose.Schema(
 
       required: true,
     },
-    pric: {
+    price: {
       type: Number,
       min: 0,
       required: true,

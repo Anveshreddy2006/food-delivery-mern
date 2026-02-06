@@ -13,9 +13,9 @@ function useGetMyshop() {
           withCredentials: true,
         });
 
-        dispatch(setMyShopData(result.data));
+        dispatch(setMyShopData(result.data.shop));
       } catch (error) {
-        console.log(error);
+        console.log(error.response?.data || error.message);
       }
     };
 

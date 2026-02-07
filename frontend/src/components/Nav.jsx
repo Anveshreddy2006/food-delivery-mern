@@ -4,6 +4,7 @@ import { IoIosSearch } from "react-icons/io";
 import { FiShoppingCart } from "react-icons/fi";
 import { RxCross2 } from "react-icons/rx";
 import { FaPlus } from "react-icons/fa6";
+
 import { TbReceipt2 } from "react-icons/tb";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -11,6 +12,7 @@ import { serverUrl } from "../config";
 import { setUserData } from "../redux/userSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
 function Nav() {
   const { userData, currentCity } = useSelector((state) => state.user);
   const { myShopData } = useSelector((state) => state.owner);
@@ -19,6 +21,7 @@ function Nav() {
   const [showInfo, setShowInfo] = React.useState(false);
   const [showSearch, setShowSearch] = React.useState(false);
   const dispatch = useDispatch();
+
   const handleLogOut = async () => {
     try {
       const result = await axios.get(`${serverUrl}/api/auth/signout`, {
@@ -32,6 +35,7 @@ function Nav() {
 
   return (
     <div className="w-full h-[80px] flex items-center justify-between md:justify-center gap-[30px] px-[20px] fixed top-0 z-[9999] bg-[#fff9f6] overflow-visible">
+      {/* mobile search */}
       {showSearch &&
         userData.role ==
           "user"(
@@ -55,6 +59,7 @@ function Nav() {
           )}
 
       <h1 className="text-3xl font-bold mb-2 text-[#ff4d2d]">Vingo</h1>
+
       {userData.role == "user" && (
         <div className="md:w-[60%] lg:w-[40%] h-[70px] bg-white shadow-xl rounded-lg items-center gap-[20px] hidden md:flex">
           <div className="flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px] border-gray-400">
@@ -88,6 +93,7 @@ function Nav() {
             />
           ))}
 
+        {/* OWNER SECTION */}
         {userData.role === "owner" ? (
           <>
             {myShopData && (
@@ -110,26 +116,26 @@ function Nav() {
                 </button>
               </>
             )}
-
             <div className="hidden md:flex items-center gap-2 cursor-pointer relative px-3 py-1 rounded-lg bg-[#ff4d2d]/10 text-[#ff4d2d] font-medium">
-              <TbReceipt2 size={20} />
-              <span>My Orders</span>
+              {" "}
+              <TbReceipt2 size={20} /> <span>My Orders</span>{" "}
               <span className="absolute -right-2 -top-2 text-xs font-bold text-white bg-[#ff4d2d] rounded-full px-[6px] py-[1px]">
-                0
-              </span>
-            </div>
-
+                {" "}
+                0{" "}
+              </span>{" "}
+            </div>{" "}
             <div className="md:hidden flex items-center gap-2 cursor-pointer relative px-3 py-1 rounded-lg bg-[#ff4d2d]/10 text-[#ff4d2d] font-medium">
-              <TbReceipt2 size={20} />
-
+              {" "}
+              <TbReceipt2 size={20} />{" "}
               <span className="absolute -right-2 -top-2 text-xs font-bold text-white bg-[#ff4d2d] rounded-full px-[6px] py-[1px]">
-                0
-              </span>
+                {" "}
+                0{" "}
+              </span>{" "}
             </div>
           </>
         ) : (
           <>
-            {/* Cart */}
+            {/* USER SECTION */}
 
             <div className="relative cursor-pointer">
               <FiShoppingCart size={25} className="text-[#ff4d2d]" />

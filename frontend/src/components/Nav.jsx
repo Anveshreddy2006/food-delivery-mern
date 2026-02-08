@@ -14,7 +14,9 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 function Nav() {
-  const { userData, currentCity } = useSelector((state) => state.user);
+  const { userData, currentCity, cartItems } = useSelector(
+    (state) => state.user,
+  );
   const { myShopData } = useSelector((state) => state.owner);
   const navigate = useNavigate();
 
@@ -137,10 +139,13 @@ function Nav() {
           <>
             {/* USER SECTION */}
 
-            <div className="relative cursor-pointer">
+            <div
+              className="relative cursor-pointer"
+              onClick={() => navigate("/cart")}
+            >
               <FiShoppingCart size={25} className="text-[#ff4d2d]" />
               <span className="absolute right-[-9px] top-[-12px] text-[#ff4d2d]">
-                0
+                {cartItems.length}
               </span>
             </div>
 

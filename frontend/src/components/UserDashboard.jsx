@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Nav from "./Nav.jsx";
 import { categories } from "../../src/category.js";
 import CategoryCard from "./CategoryCard";
-import { FaChevronCircleLeft } from "react-icons/fa";
-import { FaChevronCircleRight } from "react-icons/fa";
-import { useRef } from "react";
+import { FaChevronCircleLeft, FaChevronCircleRight } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import FoodCard from "./FoodCard";
 
 function UserDashboard() {
-  const cateScrollRef = useRef();
-  const shopScrollRef = useRef();
+  const cateScrollRef = useRef(null);
+  const shopScrollRef = useRef(null);
 
   const { currentCity, shopInMyCity, itemsInMyCity } = useSelector(
     (state) => state.user,
   );
+
   const [showLeftCateButton, setShowLeftCateButton] = useState(false);
   const [showRightCateButton, setShowRightCateButton] = useState(false);
   const [showLeftShopButton, setShowLeftShopButton] = useState(false);
@@ -22,74 +21,62 @@ function UserDashboard() {
 
   const updateButton = (ref, setLeftButton, setRightButton) => {
     const element = ref.current;
-    if (element) {
-      setLeftButton(element.scrollLeft > 0);
+    if (!element) return;
 
-      setRightButton(
-        Math.ceil(element.scrollLeft + element.clientWidth) <
-          element.scrollWidth,
-      );
-    }
+    setLeftButton(element.scrollLeft > 0);
+    setRightButton(
+      Math.ceil(element.scrollLeft + element.clientWidth) < element.scrollWidth,
+    );
   };
 
   const scrollHandler = (ref, direction) => {
-    if (ref.current) {
-      ref.current.scrollBy({
-        left: direction === "left" ? -200 : 200,
-        behavior: "smooth",
-      });
-    }
+    if (!ref.current) return;
+
+    ref.current.scrollBy({
+      left: direction === "left" ? -200 : 200,
+      behavior: "smooth",
+    });
   };
+
   useEffect(() => {
-    if (cateScrollRef.current) {
+    const cateEl = cateScrollRef.current;
+    const shopEl = shopScrollRef.current;
+
+    if (!cateEl || !shopEl) return;
+
+    const cateScrollHandler = () => {
       updateButton(
         cateScrollRef,
         setShowLeftCateButton,
         setShowRightCateButton,
       );
+    };
+
+    const shopScrollHandler = () => {
       updateButton(
         shopScrollRef,
         setShowLeftShopButton,
         setShowRightShopButton,
       );
+    };
 
-      cateScrollRef.current.addEventListener("scroll", () => {
-        updateButton(
-          cateScrollRef,
-          setShowLeftCateButton,
-          setShowRightCateButton,
-        );
-      });
-      shopScrollRef.current.addEventListener("scroll", () => {
-        updateButton(
-          shopScrollRef,
-          setShowLeftShopButton,
-          setShowRightShopButton,
-        );
-      });
-    }
+    updateButton(cateScrollRef, setShowLeftCateButton, setShowRightCateButton);
+    updateButton(shopScrollRef, setShowLeftShopButton, setShowRightShopButton);
+
+    cateEl.addEventListener("scroll", cateScrollHandler);
+    shopEl.addEventListener("scroll", shopScrollHandler);
 
     return () => {
-      cateScrollRef.current.removeEventListener("scroll", () => {
-        updateButton(
-          cateScrollRef,
-          setShowLeftCateButton,
-          setShowRightCateButton,
-        );
-      });
-      shopScrollRef.current.removeEventListener("scroll", () => {
-        updateButton(
-          shopScrollRef,
-          setShowLeftShopButton,
-          setShowRightShopButton,
-        );
-      });
+      if (cateEl) cateEl.removeEventListener("scroll", cateScrollHandler);
+      if (shopEl) shopEl.removeEventListener("scroll", shopScrollHandler);
     };
-  }, [categories]);
+  }, [categories, shopInMyCity]);
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center">
       <Nav />
+
+      {/* Categories */}
       <div className="w-full max-w-6xl flex flex-col gap-5 items-start p-[10px]">
         <h1 className="text-gray-800 text-2xl sm:text-3xl">
           Inspiration for your first order
@@ -98,7 +85,7 @@ function UserDashboard() {
         <div className="w-full relative">
           {showLeftCateButton && (
             <button
-              className="absolute left-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full shadow-lg hover:bg-[#e64528] z-10"
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full z-10"
               onClick={() => scrollHandler(cateScrollRef, "left")}
             >
               <FaChevronCircleLeft />
@@ -120,7 +107,7 @@ function UserDashboard() {
 
           {showRightCateButton && (
             <button
-              className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full shadow-lg hover:bg-[#e64528] z-10"
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full z-10"
               onClick={() => scrollHandler(cateScrollRef, "right")}
             >
               <FaChevronCircleRight />
@@ -129,14 +116,16 @@ function UserDashboard() {
         </div>
       </div>
 
+      {/* Shops */}
       <div className="w-full max-w-6xl flex flex-col gap-5 items-start p-[10px]">
         <h1 className="text-gray-800 text-2xl sm:text-3xl">
           Best Shop in {currentCity}
         </h1>
+
         <div className="w-full relative">
           {showLeftShopButton && (
             <button
-              className="absolute left-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full shadow-lg hover:bg-[#e64528] z-10"
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full z-10"
               onClick={() => scrollHandler(shopScrollRef, "left")}
             >
               <FaChevronCircleLeft />
@@ -154,7 +143,7 @@ function UserDashboard() {
 
           {showRightShopButton && (
             <button
-              className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full shadow-lg hover:bg-[#e64528] z-10"
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full z-10"
               onClick={() => scrollHandler(shopScrollRef, "right")}
             >
               <FaChevronCircleRight />
@@ -163,11 +152,13 @@ function UserDashboard() {
         </div>
       </div>
 
+      {/* Food */}
       <div className="w-full max-w-6xl flex flex-col gap-5 items-start p-[10px]">
         <h1 className="text-gray-800 text-2xl sm:text-3xl">
           Suggested Food Items
         </h1>
-        <div className="w-full h-auto flex flex-wrap gap-[20px] justify-center">
+
+        <div className="w-full flex flex-wrap gap-[20px] justify-center">
           {itemsInMyCity?.map((item, index) => (
             <FoodCard key={index} data={item} />
           ))}

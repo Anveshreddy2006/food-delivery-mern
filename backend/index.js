@@ -8,6 +8,7 @@ import userRouter from "./routes/user.routes.js";
 import itemRouter from "./routes/item.routes.js";
 import shopRouter from "./routes/shop.routes.js";
 import cors from "cors";
+import orderRouter from "./routes/order.routes.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(
@@ -22,7 +23,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/shop", shopRouter);
 app.use("/api/item", itemRouter);
-
+app.use("/api/order", orderRouter);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   connectDb();

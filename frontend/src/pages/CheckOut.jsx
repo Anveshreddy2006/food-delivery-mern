@@ -8,7 +8,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { setAddress, setLocation } from "../redux/mapSlice";
+import { MdDeliveryDining } from "react-icons/md";
+import { FaMobileScreenButton } from "react-icons/fa6";
+import { FaCreditCard } from "react-icons/fa";
 import axios from "axios";
+import { serverUrl } from "../config";
 
 function RecenterMap({ location }) {
   if (location.lat && location.lon) {
@@ -20,9 +24,14 @@ function RecenterMap({ location }) {
 
 function CheckOut() {
   const { location, address } = useSelector((state) => state.map);
-
+  const { cartItems, totalAmount } = useSelector((state) => state.user);
+  const [addressInput, setAddressInput] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const apiKey = import.meta.env.VITE_GEOAPIKEY;
+  const deliveryFee = totalAmount > 500 ? 0 : 40;
+  const AmountWithDeliveryFee = totalAmount + deliveryFee;
 
   const onDragEnd = (e) => {
     const { lat, lng } = e.target._latlng;
@@ -42,8 +51,6 @@ function CheckOut() {
 
   const getAddressByLatLng = async (lat, lng) => {
     try {
-      const apiKey = import.meta.env.VITE_GEOAPIKEY;
-
       const result = await axios.get(
         `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lng}&format=json&apiKey=${apiKey}`,
       );
@@ -53,6 +60,45 @@ function CheckOut() {
       console.log(error);
     }
   };
+
+  const getLatLngByAddress = async () => {
+    try {
+      const res = await axios(
+        `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(addressInput)}&apiKey=${apiKey}`,
+      );
+      const { lat, lon } = res.data.features[0].properties;
+      dispatch(setLocation({ lat, lon }));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    try {
+      const result = await axios.post(
+        `${serverUrl}/api/order/place-order`,
+        {
+          paymentMethod,
+          deliveryAddress: {
+            text: addressInput,
+            latitude: location.lat,
+            longitude: location.lon,
+          },
+          totalAmount,
+          cartItems,
+        },
+        { withCredentials: true },
+      );
+
+      console.log(result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    setAddressInput(address);
+  }, [address]);
 
   return (
     <div className="min-h-screen bg-[#fff9f6] flex items-center justify-center p-6">
@@ -76,10 +122,13 @@ function CheckOut() {
               type="text"
               className="flex-1 border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ff4d2d]"
               placeholder="Enter Your Delivery Address.."
-              onChange={() => {}}
-              value={address}
+              onChange={(e) => setAddressInput(e.target.value)}
+              value={addressInput}
             />
-            <button className="bg-[#ff4d2d] hover:bg-[#e64526] text-white px-3 py-2 rounded items-center justify-center">
+            <button
+              className="bg-[#ff4d2d] hover:bg-[#e64526] text-white px-3 py-2 rounded items-center justify-center"
+              onClick={getLatLngByAddress}
+            >
               <IoSearchOutline size={17} />
             </button>
 
@@ -112,6 +161,99 @@ function CheckOut() {
             </div>
           </div>
         </section>
+
+        <section>
+          <h2 className="text-lg font-semibold mb-3 text-gray-800">
+            Payment Method
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Cash on Delivery */}
+            <div
+              className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${
+                paymentMethod === "cod"
+                  ? "border-[#ff4d2d] bg-orange-50 shadow"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+              onClick={() => setPaymentMethod("cod")}
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                <MdDeliveryDining className="text-green-600 text-xl" />
+              </span>
+
+              <div>
+                <p className="font-medium text-gray-800">Cash On Delivery</p>
+                <p className="text-xs text-gray-500">
+                  Pay when your food arrives
+                </p>
+              </div>
+            </div>
+
+            {/* Online Payment */}
+            <div
+              className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${
+                paymentMethod === "online"
+                  ? "border-[#ff4d2d] bg-orange-50 shadow"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+              onClick={() => setPaymentMethod("online")}
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+                <FaMobileScreenButton className="text-purple-700 text-lg" />
+              </span>
+
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                <FaCreditCard className="text-blue-700 text-lg" />
+              </span>
+              <div>
+                <p className="font-medium text-gray-800">
+                  UPI / Credit / Debit Card
+                </p>
+                <p className="text-xs text-gray-500">Pay Securely Online</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section>
+          <h2 className="text-lg font-semibold mb-3 text-gray-800">
+            Order Summary
+          </h2>
+
+          <div className="rounded-xl border bg-gray-50 p-4 space-y-2">
+            {cartItems.map((item, index) => (
+              <div
+                key={index}
+                className="flex justify-between text-sm text-gray-700"
+              >
+                <span>
+                  {item.name} x {item.quantity}
+                </span>
+                <span>₹{item.price * item.quantity}</span>
+              </div>
+            ))}
+            <hr className="border-gray-300 my-2" />
+            <div className="flex justify-between font-medium text-gray-800">
+              <span>Subtotal</span>
+              <span>{totalAmount}</span>
+            </div>
+
+            <div className="flex justify-between text-gray-700">
+              <span>Delivery Fee</span>
+              <span>{deliveryFee == 0 ? "Free" : deliveryFee}</span>
+            </div>
+
+            <div className="flex justify-between text-lg font-bold text-[#ff4d2d] pt-2">
+              <span>Total</span>
+              <span>{AmountWithDeliveryFee}</span>
+            </div>
+          </div>
+        </section>
+        <button
+          className="w-full bg-[#ff4d2d] hover:bg-[#e64526] text-white py-3 rounded-xl font-semibold"
+          onClick={handlePlaceOrder}
+        >
+          {paymentMethod === "cod" ? "Place Order" : "Pay & Place Order"}
+        </button>
       </div>
     </div>
   );

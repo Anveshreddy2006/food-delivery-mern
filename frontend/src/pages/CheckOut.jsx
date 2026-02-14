@@ -91,6 +91,7 @@ function CheckOut() {
       );
 
       console.log(result.data);
+      navigate("/order-placed");
     } catch (error) {
       console.log(error);
     }

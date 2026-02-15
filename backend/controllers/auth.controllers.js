@@ -11,13 +11,16 @@ export const signUp = async (req, res) => {
       return res.status(400).json({ message: "User already exists." });
     }
 
-    if (password.Length < 6) {
+    if (!fullName || !email || !password || !mobile) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    if (password.length < 6) {
       return res
         .status(400)
         .json({ message: "Password must be at least 6 characters." });
     }
 
-    if (mobile.Length < 10) {
+    if (mobile.length < 10) {
       return res
         .status(400)
         .json({ message: "mobile number must be at least 10 digits." });
@@ -42,6 +45,7 @@ export const signUp = async (req, res) => {
 
     return res.status(201).json(user);
   } catch (error) {
+    // console.log("SIGNUP ERROR:", error);
     return res.status(500).json(`sign up error: ${error}`);
   }
 };

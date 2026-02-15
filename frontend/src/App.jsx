@@ -18,9 +18,11 @@ import CheckOut from "./pages/CheckOut.jsx";
 import OrderPlaced from "./pages/OrderPlaced.jsx";
 import MyOrders from "./pages/MyOrders.jsx";
 import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
+import useUpdateLocation from "./hooks/useUpdateLocation.jsx";
 
 function App() {
   useGetCurrentUser();
+  useUpdateLocation();
   useGetCity();
   useGetMyshop();
   useGetShopByCity();

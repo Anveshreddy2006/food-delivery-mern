@@ -24,7 +24,7 @@ function MyOrders() {
           {myOrders?.map((order, index) =>
             userData.role == "user" ? (
               <UserOrderCard data={order} key={index} />
-            ) : userData == "owner" ? (
+            ) : userData.role == "owner" ? (
               <OwnerOrderCard data={order} key={index} />
             ) : null,
           )}

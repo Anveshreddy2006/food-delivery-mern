@@ -9,9 +9,11 @@ import { TbReceipt2 } from "react-icons/tb";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { serverUrl } from "../config";
-import { setUserData } from "../redux/userSlice";
+import { setSearchItems, setUserData } from "../redux/userSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useEffect } from "react";
 
 function Nav() {
   const { userData, currentCity, cartItems } = useSelector(
@@ -22,6 +24,7 @@ function Nav() {
 
   const [showInfo, setShowInfo] = React.useState(false);
   const [showSearch, setShowSearch] = React.useState(false);
+  const [query, setQuery] = useState("");
   const dispatch = useDispatch();
 
   const handleLogOut = async () => {
@@ -35,30 +38,51 @@ function Nav() {
     }
   };
 
+  const handleSearchItems = async () => {
+    try {
+      const result = await axios.get(
+        `${serverUrl}/api/item/search-items?query=${query}&city=${currentCity}`,
+        { withCredentials: true },
+      );
+
+      dispatch(setSearchItems(result.data));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (query) {
+      handleSearchItems();
+    } else {
+      dispatch(setSearchItems(null));
+    }
+  }, [query]);
+
   return (
     <div className="w-full h-[80px] flex items-center justify-between md:justify-center gap-[30px] px-[20px] fixed top-0 z-[9999] bg-[#fff9f6] overflow-visible">
       {/* mobile search */}
-      {showSearch &&
-        userData.role ==
-          "user"(
-            <div className="w-[90%] h-[70px] bg-white shadow-xl rounded-lg items-center gap-[20px] flex fixed top-[80px] left-[5%] md:hidden">
-              <div className="flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px] border-gray-400">
-                <FaLocationDot size={25} className="text-[#ff4d2d]" />
-                <div className="w-[80%] truncate text-gray-600">
-                  {currentCity}
-                </div>
-              </div>
 
-              <div className="w-[80%] flex items-center gap-[10px]">
-                <IoIosSearch size={25} className="text-[#ff4d2d]" />
-                <input
-                  type="text"
-                  placeholder="search delicious food..."
-                  className="px-[10px] text-gray-700 outline-0 w-full"
-                />
-              </div>
-            </div>,
-          )}
+      {showSearch && userData?.role === "user" && (
+        <div className="w-[90%] h-[70px] bg-white shadow-xl rounded-lg items-center gap-[20px] flex fixed top-[80px] left-[5%] md:hidden">
+          <div className="flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px] border-gray-400">
+            <FaLocationDot size={25} className="text-[#ff4d2d]" />
+
+            <div className="w-[80%] truncate text-gray-600">{currentCity}</div>
+          </div>
+
+          <div className="w-[80%] flex items-center gap-[10px]">
+            <IoIosSearch size={25} className="text-[#ff4d2d]" />
+            <input
+              type="text"
+              placeholder="search delicious food..."
+              className="px-[10px] text-gray-700 outline-0 w-full"
+              onChange={(e) => setQuery(e.target.value)}
+              value={query}
+            />
+          </div>
+        </div>
+      )}
 
       <h1 className="text-3xl font-bold mb-2 text-[#ff4d2d]">Vingo</h1>
 
@@ -75,6 +99,8 @@ function Nav() {
               type="text"
               placeholder="search delicious food..."
               className="px-[10px] text-gray-700 outline-0 w-full"
+              onChange={(e) => setQuery(e.target.value)}
+              value={query}
             />
           </div>
         </div>

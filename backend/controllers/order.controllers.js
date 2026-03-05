@@ -4,7 +4,6 @@ import Shop from "../models/shop.model.js";
 import User from "../models/user.model.js";
 import DeliveryAssignment from "../models/deliveryAssignment.model.js";
 import { sendDeliveryOtpMail } from "../utils/mail.js";
-import { useReducer } from "react";
 
 export const placeOrder = async (req, res) => {
   try {
